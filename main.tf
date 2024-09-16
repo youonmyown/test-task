@@ -19,6 +19,10 @@ resource "aws_instance" "test_server" {
   ami           = "ami-0584590e5f0e97daa"
   instance_type = "t2.micro"
   key_name      = "griga-key"
+  user_data = <<EOF
+  #!/bin/bash
+  apt update -y
+  EOF
 
   vpc_security_group_ids = [aws_security_group.ssh_access.id]
 

@@ -5,5 +5,5 @@ output "instance_public_ip" {
 
 output "ssh_connection_string" {
   description = "SSH connection string to connect to the EC2 instance"
-  value       = "ssh -i "griga-key.pem" admin@${aws_instance.test_server.public_ip}"
+  value       = format("ssh -i %s -o StrictHostKeyChecking=no admin@%s", "griga-key.pem", aws_instance.test_server.public_ip)
 }
