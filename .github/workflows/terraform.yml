@@ -59,6 +59,17 @@ jobs:
       if: success()  
       run: ansible-playbook site.yml
 
+    - name: Clone s3-website repository
+      if: success()
+      run: |
+        git clone https://github.com/youonmyown/s3-website.git
+        ls s3-website/website
+
+    - name: Copy website folder to instance
+      if: success()
+      run: |
+        ansible all -m copy -a "src=./s3-website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755"
+
     - name: Terraform Destroy
       if: always()
       # if: failure()
@@ -69,22 +80,3 @@ jobs:
         TF_VAR_region: ${{ secrets.REGION }}
         TF_VAR_bucket_name: ${{ secrets.BUCKET_NAME }}
 
-#  deploy:
-#    name: Deploy to S3
-#    runs-on: ubuntu-latest
-#    needs: terraform
-    # if: success() && needs.terraform.outputs.terraform_apply == 'success'
-#    if: success()
-#    steps:
-#    - name: Checkout repository
-#      uses: actions/checkout@v2
-  
-#    - name: Setup AWS CLI
-#      uses: aws-actions/configure-aws-credentials@v2
-#      with:
-#        aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-#        aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-#        aws-region: ${{ secrets.REGION }}
-  
-#    - name: Copy files to S3
-#      run: aws s3 cp --recursive ./website/ s3://${{ secrets.BUCKET_NAME }}
