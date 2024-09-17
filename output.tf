@@ -3,7 +3,13 @@ output "instance_public_ip" {
   value       = aws_instance.test_server.public_ip
 }
 
+output "elastic_ip" {
+  description = "Elastic IP of the instance"
+  value       = aws_eip.eip.public_ip
+}
+
 output "ssh_connection_string" {
   description = "SSH connection string to connect to the EC2 instance"
-  value       = format("ssh -i %s -o StrictHostKeyChecking=no admin@%s", "griga-key.pem", aws_instance.test_server.public_ip)
+  value       = format("ssh -i %s -o StrictHostKeyChecking=no ubuntu@%s", "griga-key.pem", aws_eip.eip.public_ip)
 }
+

@@ -1,0 +1,129 @@
+---
+- hosts: webserver
+  become: yes
+  tasks:
+    - name: apt update and install package
+      apt:
+        update_cache: yes
+        name:
+          - nginx
+          - php8.3-fpm
+          - php8.3-mysql
+          - mysql-server
+          - wget
+          - curl
+          - python3-pip
+          - libmysqlclient-dev
+        state: present
+
+    - name: install pymqsql
+      apt:
+        name: python3-pymysql
+        state: present
+        update_cache: yes
+
+    - name: start nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: start PHP-FPM
+      service:
+        name: php8.3-fpm
+        state: started
+        enabled: yes
+
+    - name: start MySQL
+      service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: create DB for WordPress
+      mysql_db:
+        name: wordpress_db
+        state: present
+        login_user: root
+        login_password: "your_root_password"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      become: yes
+
+    - name: create user for WordPress
+      mysql_user:
+        name: wp_user
+        password: "strongpassword"
+        priv: "wordpress_db.*:ALL"
+        state: present
+        login_user: root
+        login_password: "your_root_password"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+      become: yes
+
+    - name: DL WordPress
+      uri:
+        url: https://wordpress.org/latest.tar.gz
+        method: GET
+        dest: /tmp/latest.tar.gz
+        return_content: yes
+      register: result
+
+    - name: writing to file
+      copy:
+        content: "{{ result.content }}"
+        dest: /tmp/latest.tar.gz
+
+    - name: unarchive WordPress
+      unarchive:
+        src: /tmp/latest.tar.gz
+        dest: /var/www/html/
+        remote_src: yes
+
+    - name: setting access
+      file:
+        path: /var/www/html/wordpress
+        owner: www-data
+        group: www-data
+        recurse: yes
+
+    - name: setting virtual host WordPress
+      copy:
+        dest: /etc/nginx/sites-available/wordpress
+        content: |
+          server {
+              listen 80;
+              server_name griga.pp.ua;
+
+              root /var/www/html/wordpress;
+              index index.php index.html index.htm;
+
+              location / {
+                  try_files $uri $uri/ /index.php?$args;
+              }
+
+              location ~ \.php$ {
+                  include snippets/fastcgi-php.conf;
+                  fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+              }
+
+              location ~ /\.ht {
+                  deny all;
+              }
+          }
+
+
+    - name: activation WordPress in Nginx
+      file:
+        src: /etc/nginx/sites-available/wordpress
+        dest: /etc/nginx/sites-enabled/wordpress
+        state: link
+
+    - name: disabling default site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

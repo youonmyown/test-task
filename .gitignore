@@ -5,3 +5,4 @@ terraform.tfstate
 terraform.tfvars
 terraform.tfstate.backup
 griga-key.pem
+hosts
