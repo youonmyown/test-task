@@ -41,6 +41,10 @@ jobs:
       id: terraform_apply
       run: terraform apply tfplan
 
+    - name: Set execute permissions for ip_to_inventory.sh
+      if: success()
+      run: chmod +x ./ip_to_inventory.sh
+
     - name: Run ip_to_inventory script
       if: success()
       run: ./ip_to_inventory.sh
