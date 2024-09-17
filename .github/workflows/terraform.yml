@@ -41,8 +41,23 @@ jobs:
       id: terraform_apply
       run: terraform apply tfplan
 
+    - name: Run ip_to_inventory script
+      if: success()
+      run: ./ip_to_inventory
+
+    - name: Install Ansible
+      if: success()
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ansible
+
+    - name: Run Ansible playbook
+      if: success()  
+      run: ansible-playbook site.yml
+
     - name: Terraform Destroy
-      if: failure()
+      if: always()
+      # if: failure()
       run: terraform destroy -auto-approve
       env:
         TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
