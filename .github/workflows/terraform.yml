@@ -57,7 +57,7 @@ jobs:
 
     - name: Run Ansible playbook
       if: success()  
-      run: ansible-playbook hosts site.yml
+      run: ansible-playbook site.yml
 
     - name: Clone s3-website repository
       if: success()
