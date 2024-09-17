@@ -43,7 +43,7 @@ jobs:
 
     - name: Run ip_to_inventory script
       if: success()
-      run: ./ip_to_inventory
+      run: ./ip_to_inventory.sh
 
     - name: Install Ansible
       if: success()
