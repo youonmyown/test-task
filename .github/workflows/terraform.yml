@@ -31,7 +31,7 @@ jobs:
 
     - name: Save tfplan artifact
       if: success()
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: tfplan
         path: tfplan
