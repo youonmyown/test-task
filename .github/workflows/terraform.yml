@@ -71,8 +71,8 @@ jobs:
         ansible all -m copy -a "src=./s3-website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755"
 
     - name: Terraform Destroy
-      if: ${{ github.event_name == 'workflow_dispatch' }}
-      # if: always()
+      # if: ${{ github.event_name == 'workflow_dispatch' }}
+      if: always()
       run: terraform destroy -auto-approve
       env:
         TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
