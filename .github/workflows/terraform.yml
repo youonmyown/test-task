@@ -65,12 +65,12 @@ jobs:
       run: |
         ELASTIC_IP=$(terraform output -raw elastic_ip)
         echo "Elastic IP: $ELASTIC_IP"
-        echo "elastic_ip=$ELASTIC_IP" >> $GITHUB_ENV
-        shell: bash
+        echo "ELASTIC_IP=$ELASTIC_IP" >> $GITHUB_ENV
+      shell: bash
 
     - name: Run Ansible Playbook
       run: |
-        ansible-playbook -i "${{ env.elastic_ip }}," -e "ansible_python_interpreter=/usr/bin/python3" site.yml
+        ansible-playbook -i "${{ env.ELASTIC_IP }}," -e "ansible_python_interpreter=/usr/bin/python3" site.yml
       shell: bash
 
     - name: Clone s3-website repository
