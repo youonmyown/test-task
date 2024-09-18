@@ -42,13 +42,13 @@ jobs:
       id: terraform_apply
       run: terraform apply tfplan
 
-    - name: Set execute permissions for ip_to_inventory.sh
-      if: success()
-      run: chmod +x ./ip_to_inventory.sh
+    # - name: Set execute permissions for ip_to_inventory.sh
+    #   if: success()
+    #   run: chmod +x ./ip_to_inventory.sh
 
-    - name: Run ip_to_inventory script
-      if: success()
-      run: ./ip_to_inventory.sh
+    # - name: Run ip_to_inventory script
+    #   if: success()
+    #   run: ./ip_to_inventory.sh
 
     - name: Install Ansible
       if: success()
@@ -56,9 +56,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ansible
 
+    # - name: Run Ansible playbook
+    #   if: success()  
+    #   run: ansible-playbook site.yml
+
     - name: Run Ansible playbook
-      if: success()  
-      run: ansible-playbook site.yml
+      run: |
+        elastic_ip=$(terraform output -raw elastic_ip)
+        echo "[webserver]" > hosts
+        echo "$elastic_ip ansible_python_interpreter=/usr/bin/python3" >> hosts
+        ansible-playbook -i hosts site.yml
 
     - name: Clone s3-website repository
       if: success()
@@ -84,11 +91,17 @@ jobs:
       with:
         terraform_version: 1.7.5
 
+    - name: Download tfplan artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: tfplan
+        path: ./tfplan
+
     - name: Terraform Init
       run: terraform init
 
     - name: Terraform Destroy
-      run: terraform destroy -auto-approve
+      run: terraform destroy tfplan -auto-approve tfplan
       env:
         TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
         TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
