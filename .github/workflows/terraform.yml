@@ -42,28 +42,28 @@ jobs:
       id: terraform_apply
       run: terraform apply tfplan
 
-    - name: Install Ansible & Python
-      if: success()
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ansible python3-pip
+    # - name: Install Ansible & Python
+    #   if: success()
+    #   run: |
+    #     sudo apt-get update
+    #     sudo apt-get install -y ansible python3-pip
 
-    - name: Run Ansible playbook
-      if: success()
-      run: |
-        elastic_ip=$(terraform output -raw elastic_ip)
-        ansible-playbook -i $elastic_ip, site.yml
+    # - name: Run Ansible playbook
+    #   if: success()
+    #   run: |
+    #     elastic_ip=$(terraform output -raw elastic_ip)
+    #     ansible-playbook -i $elastic_ip, site.yml
 
-    - name: Clone s3-website repository
-      if: success()
-      run: |
-        git clone https://github.com/youonmyown/s3-website.git
-        ls s3-website/website
+    # - name: Clone s3-website repository
+    #   if: success()
+    #   run: |
+    #     git clone https://github.com/youonmyown/s3-website.git
+    #     ls s3-website/website
 
-    - name: Copy website folder to instance
-      if: success()
-      run: |
-        ansible all -m copy -a "src=./s3-website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755" -i inventory.ini
+    # - name: Copy website folder to instance
+    #   if: success()
+    #   run: |
+    #     ansible all -m copy -a "src=./s3-website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755" -i inventory.ini
 
     - name: Terraform Destroy
       if: always()

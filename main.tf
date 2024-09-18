@@ -15,11 +15,6 @@ provider "aws" {
   secret_key = var.secret_key
 }
 
-# Elastic IP
-resource "aws_eip" "eip" {
-  vpc = true
-}
-
 # Security Group for SSH and HTTP access
 resource "aws_security_group" "web_access" {
   name        = "allow_web_access"
@@ -53,15 +48,11 @@ resource "aws_security_group" "web_access" {
 
 
 resource "aws_instance" "test_server" {
-  ami           = "ami-0e04bcbe83a83792e"
-  instance_type = "t2.micro"
-  key_name      = "griga-key"
-
-  # provisioner "local-exec" {
-  #   command = "bash ./ip_to_inventory.sh"
-  # }
+  ami                    = "ami-0e04bcbe83a83792e"
+  instance_type          = "t2.micro"
+  key_name               = "griga-key"
   vpc_security_group_ids = [aws_security_group.web_access.id]
-
+  
   associate_public_ip_address = false
 
   tags = {
@@ -69,7 +60,7 @@ resource "aws_instance" "test_server" {
   }
 }
 
-resource "aws_eip_association" "eip_assoc" {
-  instance_id   = aws_instance.test_server.id
-  allocation_id = aws_eip.eip.id
+resource "aws_eip" "eip" {
+  vpc = true
+  instance = aws_instance.test_server.id
 }
