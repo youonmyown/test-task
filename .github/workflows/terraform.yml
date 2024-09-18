@@ -60,15 +60,17 @@ jobs:
     #   if: success()  
     #   run: ansible-playbook site.yml
 
+    - name: Export Elastic IP from Terraform to Ansible
+      id: get_ip
+      run: |
+        export ELASTIC_IP=$(terraform output -raw elastic_ip)
+        echo "Elastic IP: $ELASTIC_IP"
+        echo "::set-output name=elastic_ip::$ELASTIC_IP"
+      shell: bash
+
     - name: Run Ansible Playbook
       run: |
-        elastic_ip=$(terraform output -raw elastic_ip)
-        if [[ "$elastic_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          ansible-playbook -i "$elastic_ip," -e "ansible_python_interpreter=/usr/bin/python3" site.yml
-        else
-          echo "Invalid IP: $elastic_ip"
-          exit 1
-        fi
+        ansible-playbook -i "${{ steps.get_ip.outputs.elastic_ip }}," -e "ansible_python_interpreter=/usr/bin/python3" site.yml
 
     - name: Clone s3-website repository
       if: success()
