@@ -42,13 +42,14 @@ jobs:
       id: terraform_apply
       run: terraform apply tfplan
 
-    # - name: Set execute permissions for ip_to_inventory.sh
-    #   if: success()
-    #   run: chmod +x ./ip_to_inventory.sh
-
-    # - name: Run ip_to_inventory script
-    #   if: success()
-    #   run: ./ip_to_inventory.sh
+    - name: Extract public IP from Terraform output
+      id: extract_ip
+      run: |
+        echo "WEB_SERVER_IP=$(terraform output -raw web_server_ip)" >> $GITHUB_ENV
+      env:
+        TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
+        TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
+        TF_VAR_region: ${{ secrets.REGION }}
 
     - name: Install Ansible
       if: success()
@@ -56,22 +57,15 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ansible
 
-    # - name: Run Ansible playbook
-    #   if: success()  
-    #   run: ansible-playbook site.yml
-
-    - name: Get Elastic IP
-      id: get_ip
+    - name: Write Ansible inventory
+      if: success()
       run: |
-        ELASTIC_IP=$(terraform output -raw elastic_ip)
-        echo "Elastic IP: $ELASTIC_IP"
-        echo "ELASTIC_IP=$ELASTIC_IP" >> $GITHUB_ENV
-      shell: bash
+        echo "[webserver]" > inventory.ini
+        echo "${{ env.WEB_SERVER_IP }} ansible_python_interpreter=/usr/bin/python3" >> inventory.ini
 
-    - name: Run Ansible Playbook
-      run: |
-        ansible-playbook -i "${{ env.ELASTIC_IP }}," -e "ansible_python_interpreter=/usr/bin/python3" site.yml
-      shell: bash
+    - name: Run Ansible playbook
+      if: success()  
+      run: ansible-playbook -i inventory.ini site.yml
 
     - name: Clone s3-website repository
       if: success()
@@ -82,15 +76,12 @@ jobs:
     - name: Copy website folder to instance
       if: success()
       run: |
-        ansible all -m copy -a "src=./s3-website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755"
+        ansible all -m copy -a "src=./s3-website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755" -i inventory.ini
 
-        
     - name: Terraform Destroy
-      # if: ${{ github.event_name == 'workflow_dispatch' }}
       if: always()
       run: terraform destroy -auto-approve
       env:
         TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
         TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
         TF_VAR_region: ${{ secrets.REGION }}
-
