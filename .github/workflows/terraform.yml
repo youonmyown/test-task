@@ -64,13 +64,14 @@ jobs:
       run: |
         elastic_ip=$(terraform output -raw elastic_ip)
         echo "Elastic IP: $elastic_ip"
-        if [ -z "$elastic_ip" ]; then
-          echo "Elastic IP is empty. Exiting..."
+        if [[ "$elastic_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "[webserver]" > hosts
+          echo "$elastic_ip ansible_python_interpreter=/usr/bin/python3" >> hosts
+        else
+          echo "Invalid IP: $elastic_ip"
           exit 1
         fi
-        echo "[webserver]" > hosts
-        echo "$elastic_ip ansible_python_interpreter=/usr/bin/python3" >> hosts
-        cat hosts
+        cat hosts 
 
     - name: Run Ansible playbook
       run: |
