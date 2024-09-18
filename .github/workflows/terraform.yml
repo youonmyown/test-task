@@ -60,11 +60,20 @@ jobs:
     #   if: success()  
     #   run: ansible-playbook site.yml
 
-    - name: Run Ansible playbook
+    - name: Create Ansible Inventory
       run: |
         elastic_ip=$(terraform output -raw elastic_ip)
+        echo "Elastic IP: $elastic_ip"
+        if [ -z "$elastic_ip" ]; then
+          echo "Elastic IP is empty. Exiting..."
+          exit 1
+        fi
         echo "[webserver]" > hosts
         echo "$elastic_ip ansible_python_interpreter=/usr/bin/python3" >> hosts
+        cat hosts
+
+    - name: Run Ansible playbook
+      run: |
         ansible-playbook -i hosts site.yml
 
     - name: Clone s3-website repository
@@ -78,41 +87,13 @@ jobs:
       run: |
         ansible all -m copy -a "src=./s3-website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755"
 
-  terraform_destroy:
-    name: Terraform Destroy
-    runs-on: ubuntu-latest
-    needs: terraform_apply
-    if: always()
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 1.7.5
-
-    - name: Download tfplan artifact
-      uses: actions/download-artifact@v3
-      with:
-        name: tfplan
-        path: ./tfplan
-
-    - name: Terraform Init
-      run: terraform init
-
+        
     - name: Terraform Destroy
-      run: terraform destroy tfplan -auto-approve tfplan
+      # if: ${{ github.event_name == 'workflow_dispatch' }}
+      if: always()
+      run: terraform destroy -auto-approve
       env:
         TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
         TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
         TF_VAR_region: ${{ secrets.REGION }}
-        
-    # - name: Terraform Destroy
-    #   if: ${{ github.event_name == 'workflow_dispatch' }}
-    #   # if: always()
-    #   run: terraform destroy -auto-approve
-    #   env:
-    #     TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
-    #     TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
-    #     TF_VAR_region: ${{ secrets.REGION }}
 
