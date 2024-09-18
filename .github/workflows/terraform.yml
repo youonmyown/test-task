@@ -60,22 +60,15 @@ jobs:
     #   if: success()  
     #   run: ansible-playbook site.yml
 
-    - name: Create Ansible Inventory
+    - name: Run Ansible Playbook
       run: |
         elastic_ip=$(terraform output -raw elastic_ip)
-        echo "Elastic IP: $elastic_ip"
         if [[ "$elastic_ip" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-          echo "[webserver]" > hosts
-          echo "$elastic_ip ansible_python_interpreter=/usr/bin/python3" >> hosts
+          ansible-playbook -i "$elastic_ip," -e "ansible_python_interpreter=/usr/bin/python3" site.yml
         else
           echo "Invalid IP: $elastic_ip"
           exit 1
         fi
-        cat hosts 
-
-    - name: Run Ansible playbook
-      run: |
-        ansible-playbook -i hosts site.yml
 
     - name: Clone s3-website repository
       if: success()
