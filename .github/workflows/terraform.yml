@@ -48,15 +48,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ansible python3-pip
 
-    - name: Run Python script to generate hosts file
-      if: success()
-      run: |
-        python3 generate_hosts.py
-
     - name: Run Ansible playbook
       if: success()
       run: |
-        ansible-playbook -i hosts site.yml
+        elastic_ip=$(terraform output -raw elastic_ip)
+        ansible-playbook -i $elastic_ip, site.yml
 
     - name: Clone s3-website repository
       if: success()

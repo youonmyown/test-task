@@ -1,5 +1,5 @@
 ---
-- hosts: webserver
+- hosts: all
   become: yes
   tasks:
     - name: apt update and install package
