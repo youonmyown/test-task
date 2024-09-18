@@ -45,7 +45,14 @@ jobs:
     - name: Extract public IP from Terraform output
       id: extract_ip
       run: |
-        echo "WEB_SERVER_IP=$(terraform output -raw web_server_ip)" >> $GITHUB_ENV
+        WEB_SERVER_IP=$(terraform output -raw instance_public_ip)
+        
+        if [ -z "$WEB_SERVER_IP" ]; then
+          echo "Error: No IP address found in Terraform output."
+          exit 1
+        fi
+        echo "WEB_SERVER_IP=${WEB_SERVER_IP}" >> $GITHUB_ENV
+        echo "Extracted IP address: ${WEB_SERVER_IP}"
       env:
         TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
         TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
