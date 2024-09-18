@@ -50,10 +50,6 @@ jobs:
 
     - name: Run Ansible playbook
       run: |
-        elastic_ip=$(terraform output -raw instance_public_ip)
-        echo "[webserver]" > hosts
-        echo "$elastic_ip ansible_python_interpreter=/usr/bin/python3" >> hosts
-        cat hosts  # for debug
         ansible-playbook -i hosts site.yml
       
     - name: Clone s3-website repository
