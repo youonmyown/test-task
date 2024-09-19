@@ -6,6 +6,7 @@
 Requirments: `terraform, ansible, rsync`.
 
 Create and set up `terraform.tfvars`, exaple: `example.tfvars`.
+Create and download key pair from AWS to the folder with this repository.
 
 Init terraform:
 ```
