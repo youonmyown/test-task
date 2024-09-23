@@ -1,0 +1,3 @@
+[servers]
+${elastic_ip}
+

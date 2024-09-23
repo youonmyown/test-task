@@ -48,9 +48,13 @@ resource "aws_security_group" "web_access" {
 
 
 resource "aws_instance" "test_server" {
-  ami                    = "ami-0e04bcbe83a83792e"
-  instance_type          = "t2.micro"
-  key_name               = "griga-key"
+  ami           = "ami-0e04bcbe83a83792e"
+  instance_type = "t2.micro"
+  key_name      = "griga-key"
+
+  # provisioner "local-exec" {
+  #   command = "bash ./ip_to_inventory.sh"
+  # }
   vpc_security_group_ids = [aws_security_group.web_access.id]
   
   associate_public_ip_address = false

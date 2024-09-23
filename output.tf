@@ -13,3 +13,11 @@ output "ssh_connection_string" {
   value       = format("ssh -i %s -o StrictHostKeyChecking=no ubuntu@%s", "griga-key.pem", aws_eip.eip.public_ip)
 }
 
+resource "local_file" "inventory_file" {
+  content = templatefile("./inventory.template",
+    {
+      elastic_ip = aws_eip.eip.public_ip
+    }
+  )
+  filename = "./inventory"
+}
