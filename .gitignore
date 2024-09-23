@@ -6,3 +6,4 @@ terraform.tfvars
 terraform.tfstate.backup
 griga-key.pem
 hosts
+ip_to_inventory_old.sh
