@@ -58,10 +58,10 @@ jobs:
         eval $(ssh-agent -s)
         ssh-add griga-key.pem
 
-    # - name: Run Ansible playbook
-    #   if: success()
-    #   run: |
-    #     ansible-playbook site.yml
+    - name: Run Ansible playbook
+      if: success()
+      run: |
+        ansible-playbook site.yml
 
     - name: Copy website folder to instance
       if: success()
