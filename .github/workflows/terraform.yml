@@ -48,6 +48,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ansible python3-pip
 
+        - name: Set up SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > griga-key.pem
+          chmod 600 griga-key.pem
+
+    - name: Add SSH key to agent
+      run: |
+        eval $(ssh-agent -s)
+        ssh-add griga-key.pem
+
     - name: Run Ansible playbook
       if: success()
       run: |
