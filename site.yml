@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: defaults
   become: yes
   tasks:
     - name: apt update and install package
