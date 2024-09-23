@@ -7,13 +7,13 @@
         update_cache: yes
         name:
           - nginx
-          - php8.3-fpm
-          - php8.3-mysql
-          - mysql-server
-          - wget
-          - curl
-          - python3-pip
-          - libmysqlclient-dev
+          # - php8.3-fpm
+          # - php8.3-mysql
+          # - mysql-server
+          # - wget
+          # - curl
+          # - python3-pip
+          # - libmysqlclient-dev
         state: present
 
     # - name: install pymqsql
@@ -123,7 +123,7 @@
     #     path: /etc/nginx/sites-enabled/default
     #     state: absent
 
-    # - name: restart nginx
-    #   service:
-    #     name: nginx
-    #     state: restarted
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted

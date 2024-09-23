@@ -42,17 +42,16 @@ jobs:
       id: terraform_apply
       run: terraform apply tfplan
 
-    # - name: Install Ansible & Python
-    #   if: success()
-    #   run: |
-    #     sudo apt-get update
-    #     sudo apt-get install -y ansible python3-pip
+    - name: Install Ansible & Python
+      if: success()
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ansible python3-pip
 
-    # - name: Run Ansible playbook
-    #   if: success()
-    #   run: |
-    #     elastic_ip=$(terraform output -raw elastic_ip)
-    #     ansible-playbook -i $elastic_ip, site.yml
+    - name: Run Ansible playbook
+      if: success()
+      run: |
+        ansible-playbook -i $elastic_ip, site.yml
 
     # - name: Clone s3-website repository
     #   if: success()
