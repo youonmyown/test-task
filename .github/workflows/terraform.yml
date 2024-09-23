@@ -66,7 +66,7 @@ jobs:
     - name: Copy website folder to instance
       if: success()
       run: |
-        ansible all -m copy -a "src=./website/website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755" -i inventory
+        ansible all -m copy -a "src=./website dest=/var/www/html/wordpress owner=www-data group=www-data mode=0755" -i inventory
 
     - name: Terraform Destroy
       if: always()
